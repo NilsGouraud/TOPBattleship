@@ -33,8 +33,9 @@ class Ship{
         this.tileShip[i].isIntact=false;
     }
     isSunk(){
-        for (let i = 0; i < this.length; i++) {
-            if(this.tileShip[i]==true){
+        console.log("checking tiles")
+        for (let i = 0; i < this.shipLength; i++) {
+            if(this.tileShip[i].isIntact==true){
                 return false;
             }
         }
@@ -87,15 +88,15 @@ class Gameboard{
         if(!this.canPlaceHorizontally(ship,x,y)){
             return;
         }
-
-
+        
+        
         for(let i=0;i<ship.getLength();i++){
             this.tiles[x][y]=ship.tileShip[i];
             ship.tileShip[i].positionX=x;
             ship.tileShip[i].positionY=y
             y++;
         }
-
+        
     }
     placeVertically(ship,x,y){
         if(!this.canPlaceVertically(ship,x,y)){
@@ -117,22 +118,6 @@ class Gameboard{
         console.log("placing ship vertically")
         this.placeVertically(ship,x,y);
     }
-    
-    
-    
-    receiveAttack(x,y){
-        let tile=this.tiles[x][y];
-        if(tile=="empty"){
-            missedAttacks++;
-            this.tiles[x][y]="no ship"
-            return;
-        }
-        tileShip=tile.getTile(x,y);
-        if(tileShip.isIntact=false){
-            return;
-        }
-        tileShip.hit();
-    }
 }
 
 class Player{
@@ -149,26 +134,49 @@ class Player{
     }
     hasShips(){
         for (let ship in this.ships) {
-            console.log(this.ships[ship]);
             if(!this.ships[ship].isSunk()){
                 console.log("at least one ship remains")
-            return true;
-           }
+                return true;
+            }
         }
         return false;
+    }
+    receiveAttack(x,y){
+        let tile=this.gameboard.tiles[x][y];
+        if(tile=="empty"){
+            missedAttacks++;
+            this.gameboard.tiles[x][y]="no ship"
+            return;
+        }
+        let tileShip=tile;
+        if(tileShip.isIntact=false){
+            return;
+        }
+        for(let ship in this.ships){
+            for(let i=0;i<ship.shipLength;i++){
+                if(ship.tileShip[i].positionX==x && ship.tileShip[i].positionY==y){
+                    ship.hit(i);
+                }
+            }
+        }
+        this.gameboard.tiles[x][y].isIntact=false;
     }
 }
 
 let playerOne=new Player();
 let computer=new Player();
 
-console.log(playerOne.gameboard); 
 //playerOne.ships.carrier.switchAlignment();
 playerOne.gameboard.placeShip(playerOne.ships.carrier,0,0);
 let positionCarrier=playerOne.ships.carrier.getPosition();
-console.log(positionCarrier);
-console.log(playerOne.gameboard);
 console.log(playerOne.hasShips());
+
+playerOne.receiveAttack(0,0);
+playerOne.receiveAttack(0,1);
+playerOne.receiveAttack(0,2);
+playerOne.receiveAttack(0,3);
+// playerOne.receiveAttack(0,4);
+console.log(playerOne.ships.carrier.isSunk());
 
 
 /*
